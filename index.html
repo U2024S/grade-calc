@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GradeFlow | Modern Grade Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ALL THE CSS FROM BEFORE - KEEP IT THE SAME */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --success: #4cc9f0;
+            --warning: #ff9e00;
+            --danger: #ff0054;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        /* ... KEEP ALL THE REST OF THE CSS THE SAME ... */
+        
+        /* Add this new style for the grade entry form */
+        .grade-entry-form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid var(--light-gray);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .form-row label {
+            min-width: 150px;
+            margin-bottom: 0;
+        }
+        
+        .form-row input {
+            flex: 1;
+        }
+        
+        .form-help {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .form-help i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-chart-line"></i>
+                <h1>GradeFlow</h1>
+            </div>
+            <p class="subtitle">Track your grades with embedded Google Sheets. Formulas calculate in real-time, grades stored locally.</p>
+        </header>
+
+        <main class="dashboard">
+            <section class="control-panel">
+                <h2 class="panel-title"><i class="fas fa-plus-circle"></i> Add New Class</h2>
+                
+                <div class="form-group">
+                    <label for="className">Class Name</label>
+                    <input type="text" id="className" placeholder="e.g., Calculus 101" maxlength="50">
+                </div>
+                
+                <div class="form-group">
+                    <label>Grading System</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="weighted" name="gradingType" value="weighted" checked>
+                            <label for="weighted" class="radio-label">
+                                <i class="fas fa-balance-scale"></i>
+                                Weighted
+                            </label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="points" name="gradingType" value="points">
+                            <label for="points" class="radio-label">
+                                <i class="fas fa-calculator"></i>
+                                Points-Based
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="addClassBtn" class="btn">
+                    <i class="fas fa-plus"></i> Add Class
+                </button>
+                
+                <button id="clearAllBtn" class="btn btn-secondary" style="margin-top: 15px;">
+                    <i class="fas fa-trash-alt"></i> Clear All Classes
+                </button>
+                
+                <button id="exportDataBtn" class="btn btn-warning" style="margin-top: 15px;">
+                    <i class="fas fa-download"></i> Export All Data
+                </button>
+            </section>
+            
+            <section class="classes-container">
+                <div class="classes-header">
+                    <h2 class="classes-title"><i class="fas fa-book-open"></i> My Classes</h2>
+                    <div class="classes-count"><span id="classCount">0</span> Classes</div>
+                </div>
+                
+                <div id="classesGrid" class="classes-grid">
+                    <!-- Classes will be dynamically added here -->
+                    <div class="empty-state">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>No classes added yet</h3>
+                        <p>Add your first class using the form on the left</p>
+                    </div>
+                </div>
+                
+                <div class="storage-info">
+                    <i class="fas fa-database"></i>
+                    <span>All grade data is stored locally in your browser</span>
+                </div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>GradeFlow &copy; 2023 | Modern Grade Calculator | Data stored locally in your browser</p>
+            <p>Google Sheets with formulas calculate in real-time. Final grades are saved locally.</p>
+        </footer>
+    </div>
+    
+    <!-- Modal for spreadsheet editor -->
+    <div class="modal-overlay" id="spreadsheetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Grade Calculator</div>
+                <button class="close-modal" id="closeModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Content will be dynamically added -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // PUT YOUR GOOGLE SHEETS LINKS HERE
+        const GOOGLE_SHEETS_LINKS = {
+            weighted: "https://docs.google.com/spreadsheets/d/1s4ODIFeNdgdk_bRT0dvoQTVHeFedAy6WzTPRvSQtpRs/edit?usp=sharing",
+            points: "https://docs.google.com/spreadsheets/d/1dTkE12PU1u7uUvv-SQr3sFMXdwryHnTckM3oV74dtQU/edit?usp=sharing"
+        };
+
+        // Storage keys
+        const CLASSES_STORAGE_KEY = "gradeflow_classes_v2";
+
+        // DOM Elements
+        const classNameInput = document.getElementById('className');
+        const addClassBtn = document.getElementById('addClassBtn');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const classesGrid = document.getElementById('classesGrid');
+        const classCount = document.getElementById('classCount');
+        const spreadsheetModal = document.getElementById('spreadsheetModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const closeModal = document.getElementById('closeModal');
+
+        // Class management
+        let classes = [];
+        let currentClassId = null;
+
+        // Initialize the app
+        function init() {
+            loadClasses();
+            renderClasses();
+            
+            // Event listeners
+            addClassBtn.addEventListener('click', addClass);
+            clearAllBtn.addEventListener('click', clearAllClasses);
+            exportDataBtn.addEventListener('click', exportAllData);
+            closeModal.addEventListener('click', closeSpreadsheetModal);
+            
+            spreadsheetModal.addEventListener('click', function(e) {
+                if (e.target === spreadsheetModal) {
+                    closeSpreadsheetModal();
+                }
+            });
+            
+            // Allow Enter key to add class
+            classNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addClass();
+                }
+            });
+        }
+
+        // Load classes from localStorage
+        function loadClasses() {
+            const storedClasses = localStorage.getItem(CLASSES_STORAGE_KEY);
+            if (storedClasses) {
+                try {
+                    classes = JSON.parse(storedClasses);
+                } catch (e) {
+                    console.error("Error parsing stored classes:", e);
+                    classes = [];
+                }
+            }
+        }
+
+        // Save classes to localStorage
+        function saveClasses() {
+            localStorage.setItem(CLASSES_STORAGE_KEY, JSON.stringify(classes));
+            updateClassCount();
+        }
+
+        // Update class count display
+        function updateClassCount() {
+            classCount.textContent = classes.length;
+        }
+
+        // Add a new class
+        function addClass() {
+            const className = classNameInput.value.trim();
+            const gradingType = document.querySelector('input[name="gradingType"]:checked').value;
+            
+            if (!className) {
+                alert("Please enter a class name");
+                classNameInput.focus();
+                return;
+            }
+            
+            // Check for duplicate class names
+            if (classes.some(cls => cls.name.toLowerCase() === className.toLowerCase())) {
+                alert("A class with this name already exists. Please use a different name.");
+                return;
+            }
+            
+            // Create a unique ID for the class
+            const classId = Date.now().toString();
+            
+            // Add the class to the array
+            const newClass = {
+                id: classId,
+                name: className,
+                type: gradingType,
+                createdAt: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                currentGrade: null,
+                gradeEntries: [],
+                targetGrade: null
+            };
+            
+            classes.push(newClass);
+            
+            // Save and render
+            saveClasses();
+            renderClasses();
+            
+            // Reset the form
+            classNameInput.value = "";
+            classNameInput.focus();
+            
+            // Show success message
+            showNotification(`"${className}" has been added successfully!`, "success");
+        }
+
+        // Delete a class
+        function deleteClass(classId) {
+            if (confirm("Are you sure you want to delete this class? All grade data will be permanently removed.")) {
+                classes = classes.filter(cls => cls.id !== classId);
+                saveClasses();
+                renderClasses();
+                
+                showNotification("Class has been deleted", "warning");
+            }
+        }
+
+        // Clear all classes
+        function clearAllClasses() {
+            if (classes.length === 0) return;
+            
+            if (confirm("Are you sure you want to delete ALL classes and ALL grade data? This action cannot be undone.")) {
+                classes = [];
+                saveClasses();
+                renderClasses();
+                
+                showNotification("All classes and data have been cleared", "warning");
+            }
+        }
+
+        // Export all data as JSON
+        function exportAllData() {
+            if (classes.length === 0) {
+                alert("No data to export. Add some classes first.");
+                return;
+            }
+            
+            const exportData = {
+                exportedAt: new Date().toISOString(),
+                classes: classes
+            };
+            
+            // Create a download link
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `gradeflow_export_${new Date().toISOString().slice(0,10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification("All data has been exported successfully", "success");
+        }
+
+        // Open grade calculator for a class
+        function openGradeCalculator(classId) {
+            const classObj = classes.find(cls => cls.id === classId);
+            if (!classObj) return;
+            
+            currentClassId = classId;
+            
+            // Update modal title
+            modalTitle.textContent = `${classObj.name} Grade Calculator`;
+            
+            // Get the appropriate Google Sheet link
+            const sheetLink = GOOGLE_SHEETS_LINKS[classObj.type];
+            
+            // Create modal content
+            const modalBody = document.querySelector('.modal-body');
+            modalBody.innerHTML = `
+                <div style="flex: 1; display: flex; flex-direction: column; overflow-y: auto;">
+                    <!-- Instructions -->
+                    <div style="margin-bottom: 20px; background: #f5f7ff; padding: 20px; border-radius: 10px;">
+                        <h3 style="margin-bottom: 10px; color: var(--primary);">
+                            <i class="fas fa-info-circle"></i> How to Use
+                        </h3>
+                        <ol style="margin-left: 20px; margin-bottom: 15px;">
+                            <li>Use the Google Sheet below to calculate your grade (all formulas work)</li>
+                            <li>When done, enter your final grade in the form</li>
+                            <li>Optionally set a target grade to track your progress</li>
+                            <li>Click "Save Grade" to store it locally</li>
+                        </ol>
+                        <p><strong>Tip:</strong> Make a copy of the Google Sheet for personal use (File → Make a copy)</p>
+                    </div>
+                    
+                    <!-- Google Sheet Embed -->
+                    <div style="margin-bottom: 25px;">
+                        <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-table"></i> ${classObj.type === 'weighted' ? 'Weighted' : 'Points-Based'} Calculator
+                        </h3>
+                        <div style="border: 2px solid var(--primary); border-radius: 10px; overflow: hidden;">
+                            <iframe 
+                                src="${sheetLink}" 
+                                style="width: 100%; height: 500px; border: none;"
+                                frameborder="0"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+                    
+                    <!-- Grade Entry Form -->
+                    <div class="grade-entry-form">
+                        <h3 style="margin-bottom: 20px; color: var(--primary);">
+                            <i class="fas fa-save"></i> Save Your Grade
+                        </h3>
+                        
+                        <div class="form-row">
+                            <label for="currentGradeInput">Current Grade (%)</label>
+                            <input type="number" 
+                                   id="currentGradeInput" 
+                                   min="0" 
+                                   max="100" 
+                                   step="0.1"
+                                   placeholder="e.g., 92.5"
+                                   value="${classObj.currentGrade || ''}">
+                        </div>
+                        
+                        <div class="form-row">
+                            <label for="targetGradeInput">Target Grade (%)</label>
+                            <input type="number" 
+                                   id="targetGradeInput" 
+                                   min="0" 
+                                   max="100" 
+                                   step="0.1"
+                                   placeholder="e.g., 90.0"
+                                   value="${classObj.targetGrade || ''}">
+                        </div>
+                        
+                        <div class="form-help">
+                            <p><i class="fas fa-lightbulb"></i> 
+                                <strong>Pro Tip:</strong> Use the Google Sheet above to calculate your exact grade based on assignments, 
+                                then enter the final percentage here. All formulas in the sheet will calculate automatically as you enter data.
+                            </p>
+                        </div>
+                        
+                        <button onclick="saveCurrentGrade()" class="btn" style="margin-top: 20px;">
+                            <i class="fas fa-save"></i> Save Grade
+                        </button>
+                        
+                        ${classObj.currentGrade ? `
+                            <div style="margin-top: 20px; padding: 15px; background: ${getGradeColor(classObj.currentGrade)}10; border-radius: 8px; border-left: 4px solid ${getGradeColor(classObj.currentGrade)};">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div>
+                                        <strong>Last Saved Grade:</strong> ${classObj.currentGrade}%
+                                        ${classObj.targetGrade ? `<br><small>Target: ${classObj.targetGrade}% (${(classObj.currentGrade - classObj.targetGrade).toFixed(1)}% ${classObj.currentGrade >= classObj.targetGrade ? 'above' : 'below'})</small>` : ''}
+                                    </div>
+                                    <div style="font-size: 1.5rem; font-weight: bold; color: ${getGradeColor(classObj.currentGrade)};">
+                                        ${getGradeLetter(classObj.currentGrade)}
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // Show the modal
+            spreadsheetModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Save current grade
+        function saveCurrentGrade() {
+            const gradeInput = document.getElementById('currentGradeInput');
+            const targetInput = document.getElementById('targetGradeInput');
+            
+            const grade = parseFloat(gradeInput.value);
+            const target = targetInput.value ? parseFloat(targetInput.value) : null;
+            
+            if (isNaN(grade) || grade < 0 || grade > 100) {
+                alert("Please enter a valid grade between 0 and 100.");
+                return;
+            }
+            
+            if (target !== null && (isNaN(target) || target < 0 || target > 100)) {
+                alert("Please enter a valid target grade between 0 and 100, or leave it empty.");
+                return;
+            }
+            
+            // Update the class
+            const classIndex = classes.findIndex(cls => cls.id === currentClassId);
+            if (classIndex !== -1) {
+                // Add to grade history
+                classes[classIndex].gradeEntries.push({
+                    grade: grade,
+                    date: new Date().toISOString(),
+                    target: target
+                });
+                
+                // Update current grade
+                classes[classIndex].currentGrade = grade;
+                classes[classIndex].targetGrade = target;
+                classes[classIndex].lastModified = new Date().toISOString();
+                
+                saveClasses();
+                renderClasses();
+                
+                showNotification(`Grade saved: ${grade}% (${getGradeLetter(grade)})`, "success");
+                
+                // Update the form display
+                setTimeout(() => {
+                    openGradeCalculator(currentClassId);
+                }, 500);
+            }
+        }
+
+        // Get grade letter
+        function getGradeLetter(grade) {
+            if (grade >= 97) return 'A+';
+            if (grade >= 93) return 'A';
+            if (grade >= 90) return 'A-';
+            if (grade >= 87) return 'B+';
+            if (grade >= 83) return 'B';
+            if (grade >= 80) return 'B-';
+            if (grade >= 77) return 'C+';
+            if (grade >= 73) return 'C';
+            if (grade >= 70) return 'C-';
+            if (grade >= 67) return 'D+';
+            if (grade >= 63) return 'D';
+            if (grade >= 60) return 'D-';
+            return 'F';
+        }
+
+        // Get grade color
+        function getGradeColor(grade) {
+            if (grade >= 90) return '#4CAF50'; // Green
+            if (grade >= 80) return '#2196F3'; // Blue
+            if (grade >= 70) return '#FF9800'; // Orange
+            if (grade >= 60) return '#FF5722'; // Red-Orange
+            return '#F44336'; // Red
+        }
+
+        // Close the spreadsheet modal
+        function closeSpreadsheetModal() {
+            spreadsheetModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            currentClassId = null;
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 10px;
+                background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : type === 'info' ? '#2196F3' : '#F44336'};
+                color: white;
+                font-weight: 600;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                z-index: 10000;
+                transition: all 0.3s ease;
+                transform: translateX(100%);
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 10);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Render all classes
+        function renderClasses() {
+            if (classes.length === 0) {
+                classesGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-graduation-cap"></i>
+                        <h3>No classes added yet</h3>
+                        <p>Add your first class using the form on the left</p>
+                    </div>
+                `;
+                updateClassCount();
+                return;
+            }
+            
+            // Sort classes by last modified (newest first)
+            classes.sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified));
+            
+            // Generate class cards HTML
+            const classesHTML = classes.map(cls => {
+                const hasGrade = cls.currentGrade !== null;
+                const gradeColor = hasGrade ? getGradeColor(cls.currentGrade) : 'var(--gray)';
+                const gradeLetter = hasGrade ? getGradeLetter(cls.currentGrade) : 'N/A';
+                
+                return `
+                    <div class="class-card ${cls.type}">
+                        <div class="class-header">
+                            <div class="class-name">${cls.name}</div>
+                            <div class="class-type">${cls.type === 'weighted' ? 'Weighted' : 'Points-Based'}</div>
+                        </div>
+                        
+                        <div class="class-info">
+                            <p><i class="fas fa-calendar"></i> <strong>Last Updated:</strong> ${new Date(cls.lastModified).toLocaleDateString()}</p>
+                            <p><i class="fas fa-history"></i> <strong>Entries:</strong> ${cls.gradeEntries.length}</p>
+                        </div>
+                        
+                        <div class="class-grade" style="border-left: 4px solid ${gradeColor};">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Current Grade</div>
+                                    <div style="font-size: 1.2rem; font-weight: 700; color: ${gradeColor}">
+                                        ${hasGrade ? `${cls.currentGrade}%` : 'Not Set'}
+                                    </div>
+                                </div>
+                                <div style="font-size: 2rem; font-weight: 800; color: ${gradeColor}">
+                                    ${gradeLetter}
+                                </div>
+                            </div>
+                            
+                            ${cls.targetGrade ? `
+                                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--light-gray);">
+                                    <div style="font-size: 0.9rem; color: var(--gray);">Target: ${cls.targetGrade}%</div>
+                                    <div style="height: 6px; background: var(--light-gray); border-radius: 3px; margin-top: 5px; overflow: hidden;">
+                                        <div style="height: 100%; width: ${Math.min(100, (cls.currentGrade / cls.targetGrade) * 100)}%; background: ${cls.currentGrade >= cls.targetGrade ? '#4CAF50' : '#FF9800'};"></div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="class-actions">
+                            <button class="action-btn open" onclick="openGradeCalculator('${cls.id}')">
+                                <i class="fas fa-calculator"></i> Calculate Grade
+                            </button>
+                            <button class="action-btn delete" onclick="deleteClass('${cls.id}')">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            classesGrid.innerHTML = classesHTML;
+            updateClassCount();
+        }
+
+        // Make functions available globally for onclick handlers
+        window.openGradeCalculator = openGradeCalculator;
+        window.deleteClass = deleteClass;
+        window.saveCurrentGrade = saveCurrentGrade;
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
