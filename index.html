@@ -6,25 +6,24 @@
     <title>GradeFlow | Grade Calculator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Reset & Base */
+        /* Reset */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
         
         :root {
-            --primary: #3a86ff;
-            --primary-dark: #2667cc;
-            --secondary: #8338ec;
-            --accent: #ff006e;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
-            --light-gray: #e9ecef;
-            --border-radius: 12px;
-            --shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #7c3aed;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light-gray: #e2e8f0;
+            --border-radius: 10px;
+            --shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.2s ease;
         }
         
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             min-height: 100vh;
             padding: 20px;
             color: var(--dark);
@@ -33,18 +32,12 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
         }
         
         /* Header */
         header {
-            padding: 40px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
             text-align: center;
+            padding: 40px 20px;
         }
         
         .logo {
@@ -52,32 +45,35 @@
             align-items: center;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
-        .logo i { font-size: 2.5rem; }
-        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.5px; }
-        .subtitle { opacity: 0.9; margin-top: 10px; }
+        .logo i { color: var(--primary); font-size: 2.5rem; }
+        h1 { font-size: 2.8rem; font-weight: 800; color: var(--dark); }
+        .subtitle { color: var(--gray); font-size: 1.1rem; max-width: 600px; margin: 0 auto; }
         
         /* Main Layout */
         main {
             display: grid;
-            grid-template-columns: 350px 1fr;
-            min-height: 600px;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+            margin-top: 20px;
         }
         
         /* Sidebar */
         .sidebar {
-            background: var(--light);
-            padding: 30px;
-            border-right: 1px solid var(--light-gray);
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            height: fit-content;
         }
         
         .panel-title {
-            font-size: 1.25rem;
+            font-size: 1.3rem;
             font-weight: 700;
             margin-bottom: 20px;
-            color: var(--primary);
+            color: var(--dark);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -85,16 +81,15 @@
         
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--dark); }
-        input { width: 100%; padding: 12px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 1rem; transition: var(--transition); }
-        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1); }
+        input { width: 100%; padding: 12px; border: 2px solid var(--light-gray); border-radius: 8px; font-size: 1rem; }
+        input:focus { outline: none; border-color: var(--primary); }
         
-        .radio-group {
+        .type-selector {
             display: flex;
             gap: 10px;
-            margin-top: 5px;
         }
         
-        .radio-btn {
+        .type-btn {
             flex: 1;
             padding: 12px;
             background: white;
@@ -102,12 +97,11 @@
             border-radius: 8px;
             text-align: center;
             cursor: pointer;
-            transition: var(--transition);
             font-weight: 600;
-            font-size: 0.9rem;
+            transition: var(--transition);
         }
         
-        .radio-btn.active {
+        .type-btn.active {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
@@ -131,32 +125,57 @@
             margin-top: 10px;
         }
         
-        .btn:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(58, 134, 255, 0.3); }
-        .btn-danger { background: #dc3545; }
-        .btn-danger:hover { background: #c82333; }
+        .btn:hover { background: var(--primary-dark); }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
         
-        /* Classes Grid */
-        .classes-container { padding: 30px; }
-        .classes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .classes-title { font-size: 1.5rem; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 10px; }
-        .classes-count { background: var(--primary); color: white; padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; }
+        /* Classes Section */
+        .classes-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .classes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .classes-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .classes-count {
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
         
         .classes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
         }
         
         .class-card {
             background: white;
-            border-radius: 12px;
+            border-radius: var(--border-radius);
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
             border: 1px solid var(--light-gray);
             transition: var(--transition);
         }
         
-        .class-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); }
+        .class-card:hover { box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08); }
         
         .class-header {
             display: flex;
@@ -167,13 +186,27 @@
         
         .class-name { font-size: 1.2rem; font-weight: 700; color: var(--dark); }
         .class-type { background: var(--light-gray); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
-        .weighted .class-type { background: rgba(58, 134, 255, 0.1); color: var(--primary); }
-        .points .class-type { background: rgba(131, 56, 236, 0.1); color: var(--secondary); }
+        .weighted .class-type { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .points .class-type { background: rgba(124, 58, 237, 0.1); color: var(--secondary); }
+        
+        .class-url {
+            background: var(--light);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+        
+        .class-url.empty {
+            color: var(--gray);
+            font-style: italic;
+            background: #fef3c7;
+        }
         
         .class-actions {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
         }
         
         .action-btn {
@@ -194,16 +227,16 @@
         }
         
         .action-btn:hover { background: var(--light-gray); }
-        .action-btn.open { background: rgba(58, 134, 255, 0.1); color: var(--primary); }
-        .action-btn.open:hover { background: rgba(58, 134, 255, 0.2); }
-        .action-btn.delete { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
-        .action-btn.delete:hover { background: rgba(220, 53, 69, 0.2); }
+        .action-btn.primary { background: rgba(37, 99, 235, 0.1); color: var(--primary); }
+        .action-btn.primary:hover { background: rgba(37, 99, 235, 0.2); }
+        .action-btn.danger { background: rgba(220, 38, 38, 0.1); color: #dc2626; }
+        .action-btn.danger:hover { background: rgba(220, 38, 38, 0.2); }
         
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            grid-column: 1 / -1;
             color: var(--gray);
+            grid-column: 1 / -1;
         }
         
         .empty-state i { font-size: 3rem; margin-bottom: 15px; color: var(--light-gray); }
@@ -230,7 +263,7 @@
         
         .modal-content {
             background: white;
-            border-radius: 16px;
+            border-radius: var(--border-radius);
             width: 95%;
             height: 90%;
             display: flex;
@@ -263,24 +296,33 @@
             flex-direction: column;
         }
         
-        .sheet-info {
-            padding: 20px 30px;
-            background: var(--light);
-            border-bottom: 1px solid var(--light-gray);
-            font-size: 0.9rem;
-        }
-        
-        .sheet-iframe {
+        .sheet-frame {
             flex: 1;
             width: 100%;
             border: none;
             border-radius: 0;
         }
         
+        /* Instructions */
+        .instructions {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .instructions h3 { color: #92400e; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .instructions ol { margin-left: 20px; }
+        .instructions li { margin-bottom: 8px; }
+        
         /* Responsive */
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             main { grid-template-columns: 1fr; }
-            .sidebar { border-right: none; border-bottom: 1px solid var(--light-gray); }
+            .sidebar { order: 2; }
+        }
+        
+        @media (max-width: 640px) {
             .classes-grid { grid-template-columns: 1fr; }
             h1 { font-size: 2rem; }
         }
@@ -290,10 +332,10 @@
     <div class="container">
         <header>
             <div class="logo">
-                <i class="fas fa-calculator"></i>
+                <i class="fas fa-chart-line"></i>
                 <h1>GradeFlow</h1>
             </div>
-            <p class="subtitle">Add classes, choose type, track grades. All data stays in your browser.</p>
+            <p class="subtitle">Create a spreadsheet copy for each class. All organized in one place.</p>
         </header>
         
         <main>
@@ -302,14 +344,14 @@
                 
                 <div class="form-group">
                     <label for="className">Class Name</label>
-                    <input type="text" id="className" placeholder="e.g., Math 101">
+                    <input type="text" id="className" placeholder="e.g., Calculus 101">
                 </div>
                 
                 <div class="form-group">
-                    <label>Grading Type</label>
-                    <div class="radio-group">
-                        <div class="radio-btn active" data-type="weighted">Weighted</div>
-                        <div class="radio-btn" data-type="points">Points</div>
+                    <label>Spreadsheet Type</label>
+                    <div class="type-selector">
+                        <div class="type-btn active" data-type="weighted">Weighted</div>
+                        <div class="type-btn" data-type="points">Points</div>
                     </div>
                 </div>
                 
@@ -317,12 +359,12 @@
                     <i class="fas fa-plus"></i> Add Class
                 </button>
                 
-                <button id="clearAllBtn" class="btn btn-danger" style="margin-top: 15px;">
-                    <i class="fas fa-trash"></i> Clear All
+                <button id="clearAllBtn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Clear All Classes
                 </button>
             </div>
             
-            <div class="classes-container">
+            <div class="classes-section">
                 <div class="classes-header">
                     <h2 class="classes-title"><i class="fas fa-book"></i> My Classes</h2>
                     <div class="classes-count"><span id="classCount">0</span> classes</div>
@@ -331,70 +373,123 @@
                 <div id="classesGrid" class="classes-grid">
                     <div class="empty-state">
                         <i class="fas fa-graduation-cap"></i>
-                        <h3>No classes added</h3>
+                        <h3>No classes yet</h3>
                         <p>Add your first class using the form on the left</p>
                     </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3><i class="fas fa-info-circle"></i> How to Use</h3>
+                    <ol>
+                        <li>Add a class above</li>
+                        <li>Click "Get Template" to open the spreadsheet template</li>
+                        <li>In Google Sheets: File → Make a copy</li>
+                        <li>Copy the URL of your new copy</li>
+                        <li>Paste it into the class card</li>
+                        <li>Click "Open Sheet" to use your personal copy</li>
+                    </ol>
                 </div>
             </div>
         </main>
     </div>
     
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal">
+    <!-- URL Modal -->
+    <div class="modal-overlay" id="urlModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title" id="modalTitle">Spreadsheet</div>
-                <button class="close-modal" id="closeModal">
+                <div class="modal-title">Enter Your Spreadsheet URL</div>
+                <button class="close-modal" id="closeUrlModal">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="sheet-info">
-                <i class="fas fa-info-circle"></i> 
-                This is a copy of the template. Your changes are saved locally in your browser.
+            <div class="modal-body" style="padding: 30px; display: flex; flex-direction: column;">
+                <div style="margin-bottom: 20px;">
+                    <p><strong>Steps:</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>You should have opened the template in a new tab</li>
+                        <li>In Google Sheets, go to <strong>File → Make a copy</strong></li>
+                        <li>Copy the URL of your new copy from the browser address bar</li>
+                        <li>Paste it below:</li>
+                    </ol>
+                </div>
+                
+                <div class="form-group">
+                    <label for="sheetUrlInput">Your Spreadsheet URL</label>
+                    <input type="url" id="sheetUrlInput" placeholder="https://docs.google.com/spreadsheets/d/...">
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button id="saveUrlBtn" class="btn" style="flex: 1;">
+                        <i class="fas fa-save"></i> Save URL
+                    </button>
+                    <button id="cancelUrlBtn" class="btn btn-danger" style="flex: 1;">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sheet Modal -->
+    <div class="modal-overlay" id="sheetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="sheetModalTitle">Spreadsheet</div>
+                <button class="close-modal" id="closeSheetModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
-                <iframe id="sheetFrame" class="sheet-iframe"></iframe>
+                <iframe id="sheetFrame" class="sheet-frame"></iframe>
             </div>
         </div>
     </div>
 
     <script>
-        // Template Google Sheets - PUT YOUR LINKS HERE
-        const SHEET_TEMPLATES = {
-            weighted: "https://docs.google.com/spreadsheets/d/1s4ODIFeNdgdk_bRT0dvoQTVHeFedAy6WzTPRvSQtpRs/edit?gid=380350052#gid=380350052",
-            points: "https://docs.google.com/spreadsheets/d/1yfEUt8zy--pfjfOAEMfolmhJ-K7MvL2i_TA6PYI0zvI/edit?gid=380350052#gid=380350052"
+        // Your template URLs - PUT YOUR GOOGLE SHEETS LINKS HERE
+        const TEMPLATE_URLS = {
+            weighted: "https://docs.google.com/spreadsheets/d/1VPKdFQye7_c4yKiE2h3x3A_0dBFk-MjHvZTPuyDKpP8/edit?usp=sharing",
+            points: "https://docs.google.com/spreadsheets/d/1hG_kPfyDysYF0nX6Dv4oBPvQlJPbdCE2YvM9Zve6yBk/edit?usp=sharing"
         };
 
         // Storage
-        const STORAGE_KEY = "gradeflow_classes";
+        const STORAGE_KEY = "gradeflow_classes_v3";
         
-        // DOM
+        // DOM Elements
         const classNameInput = document.getElementById('className');
         const addClassBtn = document.getElementById('addClassBtn');
         const clearAllBtn = document.getElementById('clearAllBtn');
         const classesGrid = document.getElementById('classesGrid');
         const classCount = document.getElementById('classCount');
-        const modal = document.getElementById('modal');
+        const typeBtns = document.querySelectorAll('.type-btn');
+        
+        // Modals
+        const urlModal = document.getElementById('urlModal');
+        const sheetModal = document.getElementById('sheetModal');
         const sheetFrame = document.getElementById('sheetFrame');
-        const modalTitle = document.getElementById('modalTitle');
-        const closeModal = document.getElementById('closeModal');
-        const radioBtns = document.querySelectorAll('.radio-btn');
+        const sheetModalTitle = document.getElementById('sheetModalTitle');
+        const closeSheetModal = document.getElementById('closeSheetModal');
+        const closeUrlModal = document.getElementById('closeUrlModal');
+        const sheetUrlInput = document.getElementById('sheetUrlInput');
+        const saveUrlBtn = document.getElementById('saveUrlBtn');
+        const cancelUrlBtn = document.getElementById('cancelUrlBtn');
         
         // State
         let classes = [];
-        let currentClassType = 'weighted';
+        let currentType = 'weighted';
+        let currentClassId = null;
         
         // Initialize
         function init() {
             loadClasses();
             renderClasses();
             
-            // Radio buttons
-            radioBtns.forEach(btn => {
+            // Type selection
+            typeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    radioBtns.forEach(b => b.classList.remove('active'));
+                    typeBtns.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    currentClassType = btn.dataset.type;
+                    currentType = btn.dataset.type;
                 });
             });
             
@@ -406,27 +501,41 @@
             
             // Clear all
             clearAllBtn.addEventListener('click', () => {
-                if (classes.length && confirm('Delete all classes?')) {
+                if (classes.length && confirm('Delete ALL classes and their spreadsheet URLs?')) {
                     classes = [];
                     saveClasses();
                     renderClasses();
                 }
             });
             
-            // Close modal
-            closeModal.addEventListener('click', closeModalFunc);
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) closeModalFunc();
+            // Modal close
+            closeSheetModal.addEventListener('click', closeSheetModalFunc);
+            sheetModal.addEventListener('click', (e) => {
+                if (e.target === sheetModal) closeSheetModalFunc();
+            });
+            
+            closeUrlModal.addEventListener('click', closeUrlModalFunc);
+            urlModal.addEventListener('click', (e) => {
+                if (e.target === urlModal) closeUrlModalFunc();
+            });
+            
+            cancelUrlBtn.addEventListener('click', closeUrlModalFunc);
+            
+            // Save URL
+            saveUrlBtn.addEventListener('click', saveSheetUrl);
+            sheetUrlInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') saveSheetUrl();
             });
         }
         
-        // Load from storage
+        // Load classes from storage
         function loadClasses() {
             const data = localStorage.getItem(STORAGE_KEY);
             classes = data ? JSON.parse(data) : [];
+            classCount.textContent = classes.length;
         }
         
-        // Save to storage
+        // Save classes to storage
         function saveClasses() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(classes));
             classCount.textContent = classes.length;
@@ -436,18 +545,18 @@
         function addClass() {
             const name = classNameInput.value.trim();
             if (!name) {
-                alert('Enter class name');
+                alert('Please enter a class name');
                 return;
             }
             
             const id = Date.now().toString();
-            const type = currentClassType;
+            const type = currentType;
             
             classes.push({
                 id,
                 name,
                 type,
-                sheetData: null,
+                sheetUrl: null, // Will store user's personal copy URL
                 createdAt: new Date().toISOString()
             });
             
@@ -457,33 +566,78 @@
             classNameInput.focus();
         }
         
-        // Open sheet for class
-        function openSheet(classId) {
+        // Open template to get copy
+        function getTemplate(classId) {
             const cls = classes.find(c => c.id === classId);
             if (!cls) return;
             
-            // Use template URL - it opens in viewer mode first
-            const templateUrl = SHEET_TEMPLATES[cls.type];
-            sheetFrame.src = templateUrl;
-            modalTitle.textContent = `${cls.name} - ${cls.type === 'weighted' ? 'Weighted' : 'Points'}`;
-            modal.classList.add('active');
+            // Open template in new tab
+            window.open(TEMPLATE_URLS[cls.type], '_blank');
+            
+            // Show URL input modal
+            currentClassId = classId;
+            sheetUrlInput.value = '';
+            sheetUrlInput.focus();
+            urlModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Save user's spreadsheet URL
+        function saveSheetUrl() {
+            const url = sheetUrlInput.value.trim();
+            if (!url) {
+                alert('Please paste your spreadsheet URL');
+                return;
+            }
+            
+            // Basic URL validation
+            if (!url.startsWith('https://docs.google.com/spreadsheets/')) {
+                if (!confirm('This doesn\'t look like a Google Sheets URL. Save anyway?')) {
+                    return;
+                }
+            }
+            
+            // Update class with user's URL
+            const classIndex = classes.findIndex(c => c.id === currentClassId);
+            if (classIndex !== -1) {
+                classes[classIndex].sheetUrl = url;
+                saveClasses();
+                renderClasses();
+                closeUrlModalFunc();
+            }
+        }
+        
+        // Open user's spreadsheet
+        function openSheet(classId) {
+            const cls = classes.find(c => c.id === classId);
+            if (!cls || !cls.sheetUrl) return;
+            
+            sheetFrame.src = cls.sheetUrl;
+            sheetModalTitle.textContent = `${cls.name} - ${cls.type === 'weighted' ? 'Weighted' : 'Points'}`;
+            sheetModal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
         
         // Delete class
         function deleteClass(classId) {
-            if (confirm('Delete this class?')) {
+            if (confirm('Delete this class and its spreadsheet URL?')) {
                 classes = classes.filter(c => c.id !== classId);
                 saveClasses();
                 renderClasses();
             }
         }
         
-        // Close modal
-        function closeModalFunc() {
-            modal.classList.remove('active');
+        // Close modals
+        function closeSheetModalFunc() {
+            sheetModal.classList.remove('active');
             document.body.style.overflow = 'auto';
             sheetFrame.src = '';
+        }
+        
+        function closeUrlModalFunc() {
+            urlModal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            currentClassId = null;
         }
         
         // Render classes
@@ -492,12 +646,15 @@
                 classesGrid.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-graduation-cap"></i>
-                        <h3>No classes added</h3>
+                        <h3>No classes yet</h3>
                         <p>Add your first class using the form on the left</p>
                     </div>
                 `;
                 return;
             }
+            
+            // Sort by creation date (newest first)
+            classes.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
             classesGrid.innerHTML = classes.map(cls => `
                 <div class="class-card ${cls.type}">
@@ -505,14 +662,29 @@
                         <div class="class-name">${cls.name}</div>
                         <div class="class-type">${cls.type === 'weighted' ? 'Weighted' : 'Points'}</div>
                     </div>
-                    <div style="margin: 15px 0; font-size: 0.9rem; color: var(--gray);">
-                        Created: ${new Date(cls.createdAt).toLocaleDateString()}
+                    
+                    <div class="class-url ${cls.sheetUrl ? '' : 'empty'}">
+                        ${cls.sheetUrl 
+                            ? `<strong>Your Sheet:</strong><br>${cls.sheetUrl.substring(0, 60)}...` 
+                            : '<i class="fas fa-exclamation-circle"></i> No spreadsheet URL set'}
                     </div>
+                    
                     <div class="class-actions">
-                        <button class="action-btn open" onclick="openSheet('${cls.id}')">
-                            <i class="fas fa-external-link-alt"></i> Open Sheet
-                        </button>
-                        <button class="action-btn delete" onclick="deleteClass('${cls.id}')">
+                        ${cls.sheetUrl 
+                            ? `<button class="action-btn primary" onclick="openSheet('${cls.id}')">
+                                   <i class="fas fa-external-link-alt"></i> Open Sheet
+                               </button>`
+                            : `<button class="action-btn primary" onclick="getTemplate('${cls.id}')">
+                                   <i class="fas fa-copy"></i> Get Template
+                               </button>`}
+                        
+                        ${cls.sheetUrl 
+                            ? `<button class="action-btn" onclick="getTemplate('${cls.id}')">
+                                   <i class="fas fa-redo"></i> Change URL
+                               </button>`
+                            : ''}
+                        
+                        <button class="action-btn danger" onclick="deleteClass('${cls.id}')">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
@@ -521,10 +693,11 @@
         }
         
         // Global functions
+        window.getTemplate = getTemplate;
         window.openSheet = openSheet;
         window.deleteClass = deleteClass;
         
-        // Start
+        // Start app
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
